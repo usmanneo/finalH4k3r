@@ -1,0 +1,88 @@
+{
+  "name": "H4K3R Tools - Advanced Cybersecurity Toolkit",
+  "short_name": "H4K3R Tools",
+  "description": "Professional cybersecurity tools for ethical hacking, penetration testing, and security research.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#00ffff",
+  "orientation": "portrait-primary",
+  "categories": ["security", "tools", "hacking", "pentesting"],
+  "lang": "en-US",
+  "icons": [
+    {
+      "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAB5ElEQVR42u2XPU7DMRCEH8ALcAOuQEfJCSgo6OgoKSkoKOkoKSgoKOkoKWh5AW5AR0fJCbgBL8ANuAEdL/ANjKyx8/OJ8wdGWoWdtWdnd38yY",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAB5ElEQVR42u2XPU7DMRCEH8ALcAOuQEfJCSgo6OgoKSkoKOkoKSgoKOkoKWh5AW5AR0fJCbgBL8ANuAEdL/ANjKyx8/OJ8wdGWoWdtWdnd38yY",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAB5ElEQVR42u2XPU7DMRCEH8ALcAOuQEfJCSgo6OgoKSkoKOkoKSgoKOkoKWh5AW5AR0fJCbgBL8ANuAEdL/ANjKyx8/OJ8wdGWoWdtWdnd38yY",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/assets/screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "platform": "narrow"
+    },
+    {
+      "src": "/assets/screenshot-desktop.png", 
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "platform": "wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Tools Dashboard",
+      "short_name": "Dashboard",
+      "description": "Access the main tools dashboard",
+      "url": "/dashboard",
+      "icons": [
+        {
+          "src": "/assets/dashboard-icon.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Admin Panel",
+      "short_name": "Admin",
+      "description": "Access the admin control panel",
+      "url": "/admin",
+      "icons": [
+        {
+          "src": "/assets/admin-icon.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "protocol_handlers": [
+    {
+      "protocol": "h4k3r",
+      "url": "/tool?url=%s"
+    }
+  ]
+}

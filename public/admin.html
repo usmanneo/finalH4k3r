@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>H4K3R Tools - Admin Dashboard</title>
+    
+    <!-- External Libraries -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    
+    <style>
+        .admin-header {
+            background: linear-gradient(135deg, #ff0080, #8000ff);
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .admin-header h1 {
+            font-family: 'Orbitron', monospace;
+            font-size: 2.5rem;
+            color: white;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            margin-bottom: 0.5rem;
+        }
+        
+        .admin-nav {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .nav-tab {
+            padding: 1rem 2rem;
+            background: var(--background-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-tab.active {
+            border-color: var(--primary-color);
+            background: var(--primary-color);
+            color: var(--background-dark);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+        
+        .admin-section {
+            display: none;
+        }
+        
+        .admin-section.active {
+            display: block;
+        }
+        
+        .stats-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .admin-card {
+            background: var(--gradient-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .admin-card:hover {
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-glow);
+        }
+        
+        .data-table {
+            background: var(--gradient-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+        
+        .table-header {
+            background: var(--background-darker);
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .table-content {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .device-item, .tool-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: 1rem;
+            transition: background-color 0.3s ease;
+        }
+        
+        .device-item:hover, .tool-item:hover {
+            background: rgba(0, 255, 255, 0.05);
+        }
+        
+        .device-info, .tool-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .device-name, .tool-name {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 0.25rem;
+        }
+        
+        .device-details, .tool-details {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        
+        .device-actions, .tool-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .action-btn {
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--background-darker);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+        }
+        
+        .action-btn:hover {
+            border-color: var(--primary-color);
+        }
+        
+        .action-btn.danger:hover {
+            border-color: var(--error-color);
+            background: var(--error-color);
+        }
+        
+        .action-btn.success:hover {
+            border-color: var(--success-color);
+            background: var(--success-color);
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-online {
+            background: rgba(0, 255, 65, 0.2);
+            color: var(--success-color);
+            border: 1px solid var(--success-color);
+        }
+        
+        .status-blocked {
+            background: rgba(255, 51, 102, 0.2);
+            color: var(--error-color);
+            border: 1px solid var(--error-color);
+        }
+        
+        .status-offline {
+            background: rgba(102, 102, 102, 0.2);
+            color: var(--text-muted);
+            border: 1px solid var(--text-muted);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--background-darker);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-family: inherit;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .command-panel {
+            background: var(--gradient-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .command-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .command-btn {
+            padding: 1rem;
+            background: var(--background-darker);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .command-btn:hover {
+            border-color: var(--primary-color);
+            background: var(--primary-color);
+            color: var(--background-dark);
+        }
+        
+        .logs-container {
+            background: var(--background-darker);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+        }
+        
+        .log-entry {
+            padding: 0.25rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .log-timestamp {
+            color: var(--text-muted);
+        }
+        
+        .log-level-info {
+            color: var(--primary-color);
+        }
+        
+        .log-level-warn {
+            color: var(--warning-color);
+        }
+        
+        .log-level-error {
+            color: var(--error-color);
+        }
+        
+        @media (max-width: 768px) {
+            .admin-nav {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .nav-tab {
+                width: 100%;
+                text-align: center;
+            }
+            
+            .device-item, .tool-item {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+            
+            .device-actions, .tool-actions {
+                justify-content: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Admin Header -->
+    <div class="admin-header">
+        <h1><i class="fas fa-shield-alt"></i> Admin Dashboard</h1>
+        <p>H4K3R Tools Management Console</p>
+    </div>
+
+    <div class="container">
+        <!-- Navigation -->
+        <div class="admin-nav">
+            <div class="nav-tab active" data-section="overview">
+                <i class="fas fa-chart-bar"></i> Overview
+            </div>
+            <div class="nav-tab" data-section="devices">
+                <i class="fas fa-mobile-alt"></i> Devices
+            </div>
+            <div class="nav-tab" data-section="tools">
+                <i class="fas fa-tools"></i> Tools
+            </div>
+            <div class="nav-tab" data-section="commands">
+                <i class="fas fa-terminal"></i> Commands
+            </div>
+            <div class="nav-tab" data-section="logs">
+                <i class="fas fa-file-alt"></i> Logs
+            </div>
+        </div>
+
+        <!-- Overview Section -->
+        <div id="overview" class="admin-section active">
+            <div class="stats-dashboard">
+                <div class="admin-card">
+                    <h3><i class="fas fa-mobile-alt"></i> Connected Devices</h3>
+                    <div style="font-size: 2rem; color: var(--primary-color); font-weight: 900;" id="deviceCount">0</div>
+                    <p style="color: var(--text-secondary); margin-top: 0.5rem;">Active connections</p>
+                </div>
+                
+                <div class="admin-card">
+                    <h3><i class="fas fa-tools"></i> Total Tools</h3>
+                    <div style="font-size: 2rem; color: var(--success-color); font-weight: 900;" id="toolCount">0</div>
+                    <p style="color: var(--text-secondary); margin-top: 0.5rem;">Available tools</p>
+                </div>
+                
+                <div class="admin-card">
+                    <h3><i class="fas fa-server"></i> Server Status</h3>
+                    <div style="font-size: 2rem; color: var(--warning-color); font-weight: 900;" id="serverStatus">Online</div>
+                    <p style="color: var(--text-secondary); margin-top: 0.5rem;">System health</p>
+                </div>
+                
+                <div class="admin-card">
+                    <h3><i class="fas fa-shield"></i> Security Level</h3>
+                    <div style="font-size: 2rem; color: var(--error-color); font-weight: 900;">High</div>
+                    <p style="color: var(--text-secondary); margin-top: 0.5rem;">Protection status</p>
+                </div>
+            </div>
+            
+            <div class="admin-card">
+                <h3><i class="fas fa-chart-line"></i> Real-time Activity</h3>
+                <div id="activityFeed" style="max-height: 300px; overflow-y: auto; margin-top: 1rem;">
+                    <!-- Activity entries will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Devices Section -->
+        <div id="devices" class="admin-section">
+            <div class="data-table">
+                <div class="table-header">
+                    <h3><i class="fas fa-mobile-alt"></i> Connected Devices</h3>
+                    <button class="btn btn-primary" onclick="refreshDevices()">
+                        <i class="fas fa-sync"></i> Refresh
+                    </button>
+                </div>
+                <div class="table-content" id="devicesList">
+                    <!-- Devices will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Tools Section -->
+        <div id="tools" class="admin-section">
+            <div class="data-table">
+                <div class="table-header">
+                    <h3><i class="fas fa-tools"></i> Tools Management</h3>
+                    <button class="btn btn-primary" onclick="showAddToolForm()">
+                        <i class="fas fa-plus"></i> Add Tool
+                    </button>
+                </div>
+                <div class="table-content" id="toolsList">
+                    <!-- Tools will be populated here -->
+                </div>
+            </div>
+            
+            <!-- Add Tool Form -->
+            <div id="addToolForm" class="admin-card" style="display: none;">
+                <h3><i class="fas fa-plus"></i> Add New Tool</h3>
+                <form id="toolForm">
+                    <div class="form-group">
+                        <label class="form-label">Tool Name</label>
+                        <input type="text" class="form-input" id="toolName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">URL</label>
+                        <input type="url" class="form-input" id="toolUrl" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Category</label>
+                        <select class="form-select" id="toolCategory">
+                            <option value="Network">Network</option>
+                            <option value="Web">Web Security</option>
+                            <option value="Crypto">Cryptography</option>
+                            <option value="OSINT">Intelligence</option>
+                            <option value="Mobile">Mobile</option>
+                            <option value="Exploit">Exploitation</option>
+                            <option value="Security">Security</option>
+                            <option value="Analysis">Analysis</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-textarea" id="toolDescription"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Icon</label>
+                        <input type="file" class="form-input" id="toolIcon" accept="image/*">
+                    </div>
+                    
+                    <div style="display: flex; gap: 1rem;">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Tool
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="hideAddToolForm()">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Commands Section -->
+        <div id="commands" class="admin-section">
+            <div class="command-panel">
+                <h3><i class="fas fa-terminal"></i> Global Commands</h3>
+                <p>Send commands to all connected devices or specific devices.</p>
+                
+                <div class="form-group">
+                    <label class="form-label">Target Device</label>
+                    <select class="form-select" id="targetDevice">
+                        <option value="all">All Devices</option>
+                    </select>
+                </div>
+                
+                <div class="command-buttons">
+                    <button class="command-btn" onclick="sendCommand('refresh_tools')">
+                        <i class="fas fa-sync"></i><br>Refresh Tools
+                    </button>
+                    <button class="command-btn" onclick="sendCommand('update_icons')">
+                        <i class="fas fa-image"></i><br>Update Icons
+                    </button>
+                    <button class="command-btn" onclick="sendCommand('restart_app')">
+                        <i class="fas fa-redo"></i><br>Restart App
+                    </button>
+                    <button class="command-btn" onclick="sendCommand('clear_cache')">
+                        <i class="fas fa-broom"></i><br>Clear Cache
+                    </button>
+                </div>
+            </div>
+            
+            <div class="admin-card">
+                <h3><i class="fas fa-history"></i> Command History</h3>
+                <div id="commandHistory" style="max-height: 300px; overflow-y: auto;">
+                    <!-- Command history will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Logs Section -->
+        <div id="logs" class="admin-section">
+            <div class="admin-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3><i class="fas fa-file-alt"></i> System Logs</h3>
+                    <button class="btn btn-secondary" onclick="clearLogs()">
+                        <i class="fas fa-trash"></i> Clear Logs
+                    </button>
+                </div>
+                
+                <div class="logs-container" id="logsContainer">
+                    <!-- Logs will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification System -->
+    <div id="notifications" class="notifications-container"></div>
+
+    <!-- Scripts -->
+    <script src="/js/firebase-init.js"></script>
+    <script>
+        // Admin Dashboard JavaScript
+        let devices = [];
+        let tools = [];
+        let logs = [];
+        
+        // Initialize admin dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔧 Admin Dashboard Initializing...');
+            
+            setupNavigation();
+            loadDashboardData();
+            startRealTimeUpdates();
+            
+            // Setup form handlers
+            document.getElementById('toolForm').addEventListener('submit', handleAddTool);
+        });
+        
+        function setupNavigation() {
+            const navTabs = document.querySelectorAll('.nav-tab');
+            const sections = document.querySelectorAll('.admin-section');
+            
+            navTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const sectionId = tab.dataset.section;
+                    
+                    // Update active tab
+                    navTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    // Show section
+                    sections.forEach(s => s.classList.remove('active'));
+                    document.getElementById(sectionId).classList.add('active');
+                    
+                    // Load section data
+                    loadSectionData(sectionId);
+                });
+            });
+        }
+        
+        async function loadDashboardData() {
+            try {
+                await Promise.all([
+                    loadDevices(),
+                    loadTools(),
+                    loadServerStatus()
+                ]);
+                
+                updateDashboardStats();
+                addLog('info', 'Dashboard data loaded successfully');
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+                addLog('error', 'Failed to load dashboard data');
+            }
+        }
+        
+        async function loadDevices() {
+            try {
+                const response = await fetch('/api/admin/devices');
+                const data = await response.json();
+                
+                if (data.success) {
+                    devices = data.devices || [];
+                    console.log(`Loaded ${devices.length} devices`);
+                    updateDevicesList();
+                    updateTargetDeviceSelect();
+                }
+            } catch (error) {
+                console.error('Error loading devices:', error);
+                addLog('error', 'Failed to load devices');
+            }
+        }
+        
+        async function loadTools() {
+            try {
+                const response = await fetch('/api/tools');
+                const data = await response.json();
+                
+                if (data.success) {
+                    tools = data.data || [];
+                    console.log(`Loaded ${tools.length} tools`);
+                    updateToolsList();
+                }
+            } catch (error) {
+                console.error('Error loading tools:', error);
+                addLog('error', 'Failed to load tools');
+            }
+        }
+        
+        async function loadServerStatus() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('serverStatus').textContent = data.status || 'Online';
+                    console.log('Server status loaded');
+                }
+            } catch (error) {
+                console.error('Error loading server status:', error);
+                addLog('error', 'Failed to load server status');
+            }
+        }
+        
+        function updateDashboardStats() {
+            document.getElementById('deviceCount').textContent = devices.length;
+            document.getElementById('toolCount').textContent = tools.length;
+        }
+        
+        function updateDevicesList() {
+            const container = document.getElementById('devicesList');
+            if (!container) return;
+            
+            if (devices.length === 0) {
+                container.innerHTML = '<div style="padding: 2rem; text-align: center; color: #666;">No devices connected</div>';
+                return;
+            }
+            
+            container.innerHTML = devices.map(device => `
+                <div class="device-item">
+                    <div class="device-info">
+                        <div class="device-name">${device.deviceName || device.id}</div>
+                        <div class="device-details">
+                            ID: ${device.id.substring(0, 16)}... | 
+                            Platform: ${device.platform || 'Unknown'} | 
+                            Last Seen: ${formatTimestamp(device.lastAccess)}
+                        </div>
+                        <div style="margin-top: 0.5rem;">
+                            <span class="status-badge ${getStatusClass(device.status)}">${device.status || 'Active'}</span>
+                        </div>
+                    </div>
+                    <div class="device-actions">
+                        <button class="action-btn" onclick="viewDeviceDetails('${device.id}')" title="View Details">
+                            <i class="fas fa-info-circle"></i>
+                        </button>
+                        <button class="action-btn ${device.status === 'blocked' ? 'success' : 'danger'}" 
+                                onclick="toggleDeviceBlock('${device.id}', ${device.status === 'blocked'})" 
+                                title="${device.status === 'blocked' ? 'Unblock' : 'Block'} Device">
+                            <i class="fas fa-${device.status === 'blocked' ? 'unlock' : 'ban'}"></i>
+                        </button>
+                        <button class="action-btn" onclick="sendDeviceCommand('${device.id}', 'ping')" title="Ping Device">
+                            <i class="fas fa-satellite-dish"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function updateToolsList() {
+            const container = document.getElementById('toolsList');
+            if (!container) return;
+            
+            if (tools.length === 0) {
+                container.innerHTML = '<div style="padding: 2rem; text-align: center; color: #666;">No tools available</div>';
+                return;
+            }
+            
+            container.innerHTML = tools.map(tool => `
+                <div class="tool-item">
+                    <div class="tool-info">
+                        <div class="tool-name">${tool.name}</div>
+                        <div class="tool-details">
+                            Category: ${tool.category || 'General'} | 
+                            URL: ${tool.url || tool.id} |
+                            Added: ${formatTimestamp(tool.timestamp)}
+                        </div>
+                    </div>
+                    <div class="tool-actions">
+                        <button class="action-btn" onclick="editTool('${tool.id}')" title="Edit Tool">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn danger" onclick="deleteTool('${tool.id}')" title="Delete Tool">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <button class="action-btn" onclick="testTool('${tool.url || tool.id}')" title="Test Tool">
+                            <i class="fas fa-external-link-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function updateTargetDeviceSelect() {
+            const select = document.getElementById('targetDevice');
+            if (!select) return;
+            
+            // Clear existing options except "All Devices"
+            select.innerHTML = '<option value="all">All Devices</option>';
+            
+            // Add device options
+            devices.forEach(device => {
+                const option = document.createElement('option');
+                option.value = device.id;
+                option.textContent = `${device.deviceName || device.id.substring(0, 12)}...`;
+                select.appendChild(option);
+            });
+        }
+        
+        async function toggleDeviceBlock(deviceId, isBlocked) {
+            try {
+                const response = await fetch(`/api/admin/devices/${deviceId}/block`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        blocked: !isBlocked,
+                        reason: prompt(isBlocked ? 'Reason for unblocking:' : 'Reason for blocking:') || 'Admin action'
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    addLog('info', `Device ${isBlocked ? 'unblocked' : 'blocked'}: ${deviceId.substring(0, 8)}...`);
+                    await loadDevices();
+                    showNotification(`Device ${isBlocked ? 'unblocked' : 'blocked'} successfully`, 'success');
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                console.error('Error toggling device block:', error);
+                showNotification('Failed to update device status', 'error');
+                addLog('error', `Failed to toggle device block: ${error.message}`);
+            }
+        }
+        
+        async function sendCommand(commandType) {
+            const targetDevice = document.getElementById('targetDevice').value;
+            
+            if (!confirm(`Send "${commandType}" command to ${targetDevice === 'all' ? 'all devices' : 'selected device'}?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/admin/commands', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        deviceId: targetDevice,
+                        command: commandType,
+                        data: ''
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    addLog('info', `Command sent: ${commandType} to ${targetDevice}`);
+                    showNotification('Command sent successfully', 'success');
+                    addCommandToHistory(commandType, targetDevice);
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                console.error('Error sending command:', error);
+                showNotification('Failed to send command', 'error');
+                addLog('error', `Failed to send command: ${error.message}`);
+            }
+        }
+        
+        function addCommandToHistory(command, target) {
+            const container = document.getElementById('commandHistory');
+            if (!container) return;
+            
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `
+                <span class="log-timestamp">[${new Date().toLocaleTimeString()}]</span>
+                <span class="log-level-info">Command:</span> ${command} → ${target}
+            `;
+            
+            container.insertBefore(entry, container.firstChild);
+            
+            // Limit history to 100 entries
+            while (container.children.length > 100) {
+                container.removeChild(container.lastChild);
+            }
+        }
+        
+        async function handleAddTool(e) {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            formData.append('name', document.getElementById('toolName').value);
+            formData.append('url', document.getElementById('toolUrl').value);
+            formData.append('category', document.getElementById('toolCategory').value);
+            formData.append('description', document.getElementById('toolDescription').value);
+            
+            const iconFile = document.getElementById('toolIcon').files[0];
+            let iconPath = '';
+            
+            // Upload icon if provided
+            if (iconFile) {
+                try {
+                    const iconFormData = new FormData();
+                    iconFormData.append('icon', iconFile);
+                    
+                    const iconResponse = await fetch('/api/upload-icon', {
+                        method: 'POST',
+                        body: iconFormData
+                    });
+                    
+                    const iconResult = await iconResponse.json();
+                    if (iconResult.success) {
+                        iconPath = iconResult.iconPath;
+                    }
+                } catch (error) {
+                    console.error('Icon upload failed:', error);
+                }
+            }
+            
+            // Add tool
+            try {
+                const response = await fetch('/api/tools', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: document.getElementById('toolName').value,
+                        url: document.getElementById('toolUrl').value,
+                        category: document.getElementById('toolCategory').value,
+                        description: document.getElementById('toolDescription').value,
+                        icon: iconPath
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    showNotification('Tool added successfully', 'success');
+                    addLog('info', `Tool added: ${result.tool.name}`);
+                    hideAddToolForm();
+                    document.getElementById('toolForm').reset();
+                    await loadTools();
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                console.error('Error adding tool:', error);
+                showNotification('Failed to add tool', 'error');
+                addLog('error', `Failed to add tool: ${error.message}`);
+            }
+        }
+        
+        function showAddToolForm() {
+            document.getElementById('addToolForm').style.display = 'block';
+        }
+        
+        function hideAddToolForm() {
+            document.getElementById('addToolForm').style.display = 'none';
+        }
+        
+        async function deleteTool(toolId) {
+            if (!confirm('Are you sure you want to delete this tool?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/tools/${toolId}`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    showNotification('Tool deleted successfully', 'success');
+                    addLog('info', `Tool deleted: ${toolId}`);
+                    await loadTools();
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                console.error('Error deleting tool:', error);
+                showNotification('Failed to delete tool', 'error');
+                addLog('error', `Failed to delete tool: ${error.message}`);
+            }
+        }
+        
+        function testTool(url) {
+            window.open(url, '_blank');
+            addLog('info', `Tool tested: ${url}`);
+        }
+        
+        function refreshDevices() {
+            loadDevices();
+            addLog('info', 'Device list refreshed');
+        }
+        
+        function loadSectionData(sectionId) {
+            switch (sectionId) {
+                case 'devices':
+                    loadDevices();
+                    break;
+                case 'tools':
+                    loadTools();
+                    break;
+                case 'overview':
+                    loadDashboardData();
+                    break;
+            }
+        }
+        
+        function startRealTimeUpdates() {
+            // Update every 30 seconds
+            setInterval(() => {
+                loadDashboardData();
+            }, 30000);
+        }
+        
+        function addLog(level, message) {
+            const container = document.getElementById('logsContainer');
+            if (!container) return;
+            
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `
+                <span class="log-timestamp">[${new Date().toLocaleTimeString()}]</span>
+                <span class="log-level-${level}">[${level.toUpperCase()}]</span>
+                ${message}
+            `;
+            
+            container.insertBefore(entry, container.firstChild);
+            
+            // Limit to 200 entries
+            while (container.children.length > 200) {
+                container.removeChild(container.lastChild);
+            }
+            
+            logs.push({
+                timestamp: Date.now(),
+                level: level,
+                message: message
+            });
+        }
+        
+        function clearLogs() {
+            const container = document.getElementById('logsContainer');
+            if (container) {
+                container.innerHTML = '';
+            }
+            logs = [];
+            addLog('info', 'Logs cleared');
+        }
+        
+        function formatTimestamp(timestamp) {
+            if (!timestamp) return 'Unknown';
+            return new Date(timestamp).toLocaleString();
+        }
+        
+        function getStatusClass(status) {
+            switch (status) {
+                case 'blocked': return 'status-blocked';
+                case 'connected': 
+                case 'active': return 'status-online';
+                default: return 'status-offline';
+            }
+        }
+        
+        function showNotification(message, type = 'info') {
+            const container = document.getElementById('notifications');
+            if (!container) return;
+            
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            
+            const icon = type === 'success' ? 'check-circle' : 
+                         type === 'error' ? 'exclamation-circle' :
+                         type === 'warning' ? 'exclamation-triangle' : 'info-circle';
+            
+            notification.innerHTML = `
+                <i class="fas fa-${icon}"></i>
+                <span>${message}</span>
+            `;
+            
+            container.appendChild(notification);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 5000);
+        }
+        
+        // Initial log
+        addLog('info', 'Admin Dashboard initialized successfully');
+    </script>
+</body>
+</html>

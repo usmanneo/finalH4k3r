@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>H4K3R Tools - Advanced Cybersecurity Toolkit</title>
+    <meta name="description" content="Professional cybersecurity tools for ethical hacking, penetration testing, and security research.">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAB5ElEQVR42u2XPU7DMRCEH8ALcAOuQEfJCSgo6OgoKSkoKOkoKSgoKOkoKWh5AW5AR0fJCbgBL8ANuAEdL/ANjKyx8/OJ8wdGWoWdtWdnd38yY">
+    
+    <!-- External Libraries -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#00ffff">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-logo">
+                <div class="rotating-ring"></div>
+                <div class="center-logo">
+                    <i class="fas fa-skull"></i>
+                </div>
+            </div>
+            <div class="loading-text">
+                <h2>H4K3R TOOLS</h2>
+                <p>Initializing cybersecurity toolkit...</p>
+            </div>
+            <div class="loading-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="loading-status" id="loadingStatus">Loading...</div>
+            </div>
+        </div>
+        
+        <!-- Matrix Rain Background -->
+        <div class="matrix-rain">
+            <canvas id="matrixCanvas"></canvas>
+        </div>
+        
+        <!-- Floating Particles -->
+        <div class="floating-particles">
+            <div class="particle particle-1"></div>
+            <div class="particle particle-2"></div>
+            <div class="particle particle-3"></div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="mainApp" class="main-app hidden">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo-container">
+                        <div class="rotating-logo">
+                            <i class="fas fa-skull"></i>
+                        </div>
+                    </div>
+                    <div class="logo-text">
+                        <h1>H4K3R TOOLS</h1>
+                        <p>Advanced Cybersecurity Toolkit</p>
+                    </div>
+                </div>
+                
+                <div class="header-controls">
+                    <div class="connection-status" id="connectionStatus">
+                        <i class="fas fa-wifi" id="statusIcon"></i>
+                        <span id="statusText">Connecting...</span>
+                    </div>
+                    
+                    <div class="header-buttons">
+                        <button class="btn-icon" id="refreshBtn" title="Refresh Tools">
+                            <i class="fas fa-sync"></i>
+                        </button>
+                        <button class="btn-icon" id="settingsBtn" title="Settings">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                        <button class="btn-icon" id="adminBtn" title="Admin Panel">
+                            <i class="fas fa-shield-halved"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="container">
+                <!-- Stats Section -->
+                <section class="stats-section">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-tools"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="toolsCount">32</h3>
+                                <p>Active Tools</p>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-server"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="serverStatus">Online</h3>
+                                <p>Server Status</p>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-shield"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="securityLevel">High</h3>
+                                <p>Security Level</p>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="lastUpdate">Now</h3>
+                                <p>Last Update</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tools Section -->
+                <section class="tools-section">
+                    <div class="section-header">
+                        <h2>
+                            <i class="fas fa-toolbox"></i>
+                            Cybersecurity Toolkit
+                        </h2>
+                        <p>Professional-grade tools for ethical hacking and security research</p>
+                    </div>
+                    
+                    <!-- Tool Categories Filter -->
+                    <div class="category-filter">
+                        <button class="filter-btn active" data-category="all">All Tools</button>
+                        <button class="filter-btn" data-category="Network">Network</button>
+                        <button class="filter-btn" data-category="Web">Web Security</button>
+                        <button class="filter-btn" data-category="Crypto">Cryptography</button>
+                        <button class="filter-btn" data-category="OSINT">Intelligence</button>
+                        <button class="filter-btn" data-category="Mobile">Mobile</button>
+                        <button class="filter-btn" data-category="Exploit">Exploitation</button>
+                    </div>
+                    
+                    <!-- Tools Grid -->
+                    <div class="tools-grid" id="toolsGrid">
+                        <!-- Tools will be dynamically loaded here -->
+                    </div>
+                    
+                    <!-- Loading Indicator -->
+                    <div class="tools-loading" id="toolsLoading">
+                        <div class="spinner"></div>
+                        <p>Loading tools...</p>
+                    </div>
+                </section>
+
+                <!-- Features Section -->
+                <section class="features-section">
+                    <div class="section-header">
+                        <h2>
+                            <i class="fas fa-rocket"></i>
+                            Advanced Features
+                        </h2>
+                    </div>
+                    
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-cloud"></i>
+                            </div>
+                            <h3>Real-time Updates</h3>
+                            <p>Tools are synchronized in real-time across all devices using Firebase</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
+                            <h3>Cross-platform</h3>
+                            <p>Works seamlessly on Android, iOS, Windows, macOS, and Linux</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-shield-virus"></i>
+                            </div>
+                            <h3>Enterprise Security</h3>
+                            <p>Military-grade encryption and security protocols</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-users-cog"></i>
+                            </div>
+                            <h3>Team Collaboration</h3>
+                            <p>Share tools and findings with your security team</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-left">
+                        <p>&copy; 2025 H4K3R Tools. All rights reserved.</p>
+                        <p>For educational and authorized testing purposes only.</p>
+                    </div>
+                    <div class="footer-right">
+                        <div class="social-links">
+                            <a href="#" title="GitHub"><i class="fab fa-github"></i></a>
+                            <a href="#" title="Discord"><i class="fab fa-discord"></i></a>
+                            <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Tool Modal -->
+    <div id="toolModal" class="tool-modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Tool Name</h3>
+                <button class="modal-close" id="modalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="tool-preview">
+                    <iframe id="toolFrame" src="" frameborder="0"></iframe>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="modalCancel">Close</button>
+                <button class="btn btn-primary" id="modalOpen">Open Tool</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification System -->
+    <div id="notifications" class="notifications-container"></div>
+
+    <!-- Scripts -->
+    <script src="/js/firebase-init.js"></script>
+    <script src="/js/app.js"></script>
+    
+    <!-- Matrix Rain Animation -->
+    <script>
+        // Simple Matrix Rain Animation for Loading Screen
+        function startMatrixRain() {
+            const canvas = document.getElementById('matrixCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            const matrix = "01";
+            const matrixArray = matrix.split("");
+            
+            const fontSize = 10;
+            const columns = canvas.width / fontSize;
+            
+            const drops = [];
+            for (let x = 0; x < columns; x++) {
+                drops[x] = 1;
+            }
+            
+            function draw() {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = '#00ffff';
+                ctx.font = fontSize + 'px Fira Code';
+                
+                for (let i = 0; i < drops.length; i++) {
+                    const text = matrixArray[Math.floor(Math.random() * matrixArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+            
+            const matrixInterval = setInterval(draw, 35);
+            
+            // Stop after loading
+            setTimeout(() => {
+                clearInterval(matrixInterval);
+            }, 5000);
+        }
+        
+        // Start matrix rain on load
+        window.addEventListener('load', startMatrixRain);
+    </script>
+</body>
+</html>
