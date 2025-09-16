@@ -13,7 +13,7 @@ const { v4: uuidv4 } = require('uuid');
 const { initializeFirebase, db, admin } = require('./firebase-config');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 
 // ==================== MIDDLEWARE SETUP ====================
 
@@ -91,17 +91,27 @@ let devicesCollection = new Map();
 let blockedDevices = new Set();
 
 async function initializeServer() {
+  console.log('🚀 Initializing H4K3R Tools Server...');
+  
   try {
     await initializeFirebase();
     firebaseInitialized = true;
     console.log('🔥 Firebase initialized successfully');
     
     // Load blocked devices from Firebase
-    loadBlockedDevices();
+    try {
+      await loadBlockedDevices();
+    } catch (fbError) {
+      console.warn('⚠️  Could not load blocked devices from Firebase:', fbError.message);
+    }
   } catch (error) {
     console.warn('⚠️  Firebase initialization failed, running in API-only mode:', error.message);
     firebaseInitialized = false;
   }
+  
+  // Server will continue to work even if Firebase fails
+  console.log('✅ Server initialization complete');
+  console.log(`📡 Mode: ${firebaseInitialized ? 'Firebase + API' : 'API Only'}`);
 }
 
 async function loadBlockedDevices() {
@@ -309,7 +319,23 @@ app.get('/api/status', checkDeviceBlocked, (req, res) => {
     timestamp: Date.now(),
     firebase: firebaseInitialized,
     tools: defaultTools.length,
-    message: 'H4K3R Tools Server Running'
+    message: 'H4K3R Tools Server Running',
+    port: PORT,
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+// Simple health check for deployment platforms
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
+// Root health check
+app.get('/ping', (req, res) => {
+  res.status(200).json({ 
+    status: 'alive',
+    timestamp: Date.now(),
+    uptime: process.uptime()
   });
 });
 
@@ -679,11 +705,12 @@ async function startServer() {
   try {
     await initializeServer();
     
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
       console.log('🚀 =========================================');
       console.log('🎯 H4K3R Tools Server Started Successfully');
       console.log('🚀 =========================================');
-      console.log(`📡 Server running on: http://localhost:${PORT}`);
+      console.log(`📡 Server running on port: ${PORT}`);
+      console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
       console.log(`🔥 Firebase: ${firebaseInitialized ? 'Connected' : 'Disabled'}`);
       console.log(`🛡️  Blocked devices: ${blockedDevices.size}`);
       console.log(`🧰 Default tools: ${defaultTools.length}`);
@@ -696,6 +723,10 @@ async function startServer() {
       console.log('   GET  /admin           - Admin dashboard');
       console.log('   GET  /dashboard       - Tools dashboard');
       console.log('🚀 =========================================');
+      
+      // Log important deployment info
+      console.log(`✅ Server successfully bound to 0.0.0.0:${PORT}`);
+      console.log(`🌍 Ready to accept connections from any IP`);
     });
   } catch (error) {
     console.error('❌ Failed to start server:', error);
