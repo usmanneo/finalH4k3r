@@ -42,12 +42,11 @@ async function initializeFirebase() {
           projectId: firebaseConfig.projectId
         });
       } else {
-        // Development mode - initialize with minimal config
-        console.log('⚠️  No service account found, initializing in development mode');
-        admin.initializeApp({
-          databaseURL: firebaseConfig.databaseURL,
-          projectId: firebaseConfig.projectId
-        });
+        // Production mode without service account - client-side only
+        console.log('⚠️  No service account found, running in client-side mode');
+        console.log('🔄 Firebase Admin SDK disabled, using client-side Firebase only');
+        isInitialized = false;
+        return initializeMockFirebase();
       }
     }
     
